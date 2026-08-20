@@ -34,8 +34,24 @@
     "test/**",
     "cordis.patch.yml",
     "README.md",
+    "README.en.md",
     "README.zh.md"
   ],
+  "keywords": [
+    "deepseek",
+    "deepseek-harness",
+    "dsh",
+    "llm-as-a-verifier",
+    "llm-verifier",
+    "turboagent",
+    "best-of-n",
+    "probabilistic-pivot-tournament",
+    "ai-agent",
+    "agent-evaluation"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -48,7 +64,10 @@
   "scripts": {
     "check": "for f in lib/*.js test/*.mjs; do node --check \"$f\" || exit 1; done && PYTHONPYCACHEPREFIX=\"${TMPDIR:-/tmp}/dsh-verifier-pycache\" python3 -m py_compile assets/sidecar.py test/fake_openai.py test/integration.py && echo all source files OK",
     "test:agent": "node test/agent-pipeline.mjs",
-    "test:integration": "python3 test/integration.py"
+    "test:integration": "python3 test/integration.py",
+    "test:preset": "node test/preset-installer.mjs",
+    "test": "npm run check && npm run test:preset && npm run test:agent && npm run test:integration",
+    "prepack": "npm test"
   },
   "dependencies": {
     "schemastery": "^3.18.0"

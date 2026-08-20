@@ -126,16 +126,36 @@ reasoning 字段与 logprob 解析的修复。Python 评分框架没有被改写
 
 ## 安装与运行
 
+推荐直接安装 GitHub Release，preset 会在 DSH 首次启动时自动、安全地写入用户目录：
+
+```bash
+npx @deepseek-ai/dsh plugin --profile web add https://github.com/xltzsoft/dsh-verifier/releases/latest/download/dsh-verifier.tgz
+```
+
+然后启动或重启 DSH：
+
+```bash
+npx @deepseek-ai/dsh web
+```
+
+包发布到 npm Registry 后也可使用同样的一行式安装：
+
+```bash
+npx @deepseek-ai/dsh plugin --profile web add @linxin666/dsh-verifier
+```
+
+需要从源码开发时才使用：
+
 ```bash
 git clone https://github.com/xltzsoft/dsh-verifier.git
 cd dsh-verifier
-mkdir -p ~/.dsh/.agent-presets/verifier
-cp presets/verifier/*.yml ~/.dsh/.agent-presets/verifier/
 npx @deepseek-ai/dsh plugin --profile web add "file:$PWD"
 npx @deepseek-ai/dsh web
 ```
 
-启动后新建会话并选择「Verifier 模式」。首次调用会创建并校验私有 venv。运行时文件均保存在仓库之外：
+启动后新建会话并选择「Verifier 模式」。插件首次启动会自动安装 preset；之后仅当这两个托管 YAML
+没有被用户修改时才随包升级，已有的自定义 preset 永远不会被覆盖。首次调用会创建并校验私有 venv。
+运行时文件均保存在仓库之外：
 
 - preset：`~/.dsh/.agent-presets/verifier/`
 - 配置：`~/.dsh/verifier.json`（0600，API 返回时密钥会遮罩）
@@ -163,6 +183,7 @@ API token。已覆盖：
 ```bash
 cd dsh-verifier
 npm run check
+npm run test:preset
 npm run test:agent
 npm run test:integration
 ```

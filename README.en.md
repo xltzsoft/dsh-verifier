@@ -62,17 +62,39 @@ guidance or explicit verifier tool call is required. The precise boundaries are:
 
 ## Install
 
+The recommended one-line install uses the latest GitHub Release. The preset is
+installed safely into the DSH user root on first boot:
+
+```bash
+npx @deepseek-ai/dsh plugin --profile web add https://github.com/xltzsoft/dsh-verifier/releases/latest/download/dsh-verifier.tgz
+```
+
+Then start or restart DSH:
+
+```bash
+npx @deepseek-ai/dsh web
+```
+
+After the package is published to the npm Registry, the equivalent command is:
+
+```bash
+npx @deepseek-ai/dsh plugin --profile web add @linxin666/dsh-verifier
+```
+
+Use a local checkout only for development:
+
 ```bash
 git clone https://github.com/xltzsoft/dsh-verifier.git
 cd dsh-verifier
-mkdir -p ~/.dsh/.agent-presets/verifier
-cp presets/verifier/*.yml ~/.dsh/.agent-presets/verifier/
 npx @deepseek-ai/dsh plugin --profile web add "file:$PWD"
 npx @deepseek-ai/dsh web
 ```
 
-Create a session and select `Verifier 模式`. Runtime state and credentials are
-kept outside the repository under `~/.dsh/`; no API keys belong in this checkout.
+Create a session and select `Verifier 模式`. The first boot installs the preset;
+future package versions update it only while its managed YAML files remain
+unmodified, so an existing custom preset is never overwritten. Runtime state
+and credentials are kept outside the repository under `~/.dsh/`; no API keys
+belong in this checkout.
 
 ## Backend and model configuration
 
@@ -139,6 +161,7 @@ Run it with:
 
 ```bash
 npm run check
+npm run test:preset
 npm run test:agent
 npm run test:integration
 ```
