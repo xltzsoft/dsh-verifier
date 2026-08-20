@@ -16,7 +16,7 @@ Terminal-Bench 2.0 path and vLLM/SGLang reasoning-logprob fixes.
 Every ordinary model step in a Verifier session is transparently wrapped as:
 
 ```text
-optional context refinement -> N concurrent candidates -> exact majority shortcut
+optional context refinement -> N parallel or sequential candidates -> exact majority shortcut
 -> otherwise official Probabilistic Pivot Tournament -> replay the winner only
 -> asynchronous progress verification
 ```
@@ -32,10 +32,16 @@ three times. `verifier_config.agent.models` may instead list heterogeneous DSH
 API keys are duplicated in this plugin's config. `agent.verifierModel` and the
 top-level verifier backend/model independently select the scoring model.
 
+`agent.candidateScheduling` is `parallel` by default. Set it to `sequential`
+to wait for candidate 1 to finish before issuing candidate 2, and so on. The
+same option and the default candidate count are editable at
+**Settings → Verifier**; changes apply to the next ordinary model step without
+a restart.
+
 ### Live UI console
 
 The `Verifier` conversation tab streams the whole pipeline over SSE: context
-refinement, each candidate's route/status/action preview and token usage,
+refinement, parallel/sequential scheduling, each candidate's route/status/action preview and token usage,
 majority or PPT selection, scores, winner, comparisons, fallback reason, and
 asynchronous Progress result. Session history survives process restarts through
 the audit logs in `~/.dsh/verifier/pipeline/`.

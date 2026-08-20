@@ -31,6 +31,31 @@ function fakeContext(texts) {
   }
 }
 
+function concurrencyContext(texts, delayMs = 12) {
+  let calls = 0
+  let inFlight = 0
+  let maxInFlight = 0
+  return {
+    llm: {
+      stream() {
+        const text = texts[calls++]
+        return (async function* () {
+          inFlight += 1
+          maxInFlight = Math.max(maxInFlight, inFlight)
+          try {
+            await new Promise(resolve => setTimeout(resolve, delayMs))
+            yield* response(text)
+          } finally {
+            inFlight -= 1
+          }
+        })()
+      },
+    },
+    get calls() { return calls },
+    get maxInFlight() { return maxInFlight },
+  }
+}
+
 const original = {
   provider: 'test-provider',
   model: 'test-model',
@@ -134,6 +159,40 @@ assert.equal(isVerifierAgent({
   assert.equal(latest.candidates.length, 3)
   assert.equal(latest.candidates.filter(candidate => candidate.status === 'done').length, 3)
   assert.equal(latest.bestIndex, 0)
+}
+
+async function runScheduling(candidateScheduling) {
+  const ctx = concurrencyContext(['same', 'same', 'different'])
+  const chunks = []
+  for await (const chunk of turboAgentStream(ctx, original, { id: 'session-1' },
+    () => { throw new Error('original next must be intercepted') }, {
+      config: {
+        agent: {
+          enabled: true,
+          numCandidates: 3,
+          candidateScheduling,
+          majorityVoting: true,
+          progressMonitor: { enabled: false },
+          context: { enabled: false },
+        },
+      },
+      select: async () => { throw new Error('majority must skip verifier') },
+      saveLog: false,
+    })) chunks.push(chunk)
+  assert.equal(formatAction(chunks), 'same')
+  return ctx
+}
+
+{
+  const parallel = await runScheduling('parallel')
+  assert.equal(parallel.calls, 3)
+  assert.equal(parallel.maxInFlight, 3)
+  assert.equal(agentPipelineSnapshot().pipeline.activities[0].scheduling, 'parallel')
+
+  const sequential = await runScheduling('sequential')
+  assert.equal(sequential.calls, 3)
+  assert.equal(sequential.maxInFlight, 1)
+  assert.equal(agentPipelineSnapshot().pipeline.activities[0].scheduling, 'sequential')
 }
 
 console.log('agent pipeline tests passed')

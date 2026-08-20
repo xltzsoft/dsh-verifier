@@ -16,7 +16,7 @@ reasoning 字段与 logprob 解析的修复。Python 评分框架没有被改写
 选择「Verifier 模式」后，每一个普通模型 step 都会自动执行：
 
 ```text
-可选 context refinement → N 个候选并发推理 → 精确多数投票（命中时短路）
+可选 context refinement → N 个候选（并行或逐路串行）→ 精确多数投票（命中时短路）
 → 否则由官方 Probabilistic Pivot Tournament 择优 → 只回放获胜候选 → 异步进度评分
 ```
 
@@ -24,7 +24,7 @@ reasoning 字段与 logprob 解析的修复。Python 评分框架没有被改写
 提供多个候选。候选中的工具调用只有获胜后才会进入会话执行。普通 preset 会被 session 级选择状态严格
 隔离，不会被这条管线拦截。
 
-默认并发采样当前 DSH session 已选择的模型 3 次。也可以使用 DSH 中已经配置好的任意 provider/model，
+默认并行采样当前 DSH session 已选择的模型 3 次。也可以使用 DSH 中已经配置好的任意 provider/model，
 包括混合模型：
 
 ```json
@@ -35,6 +35,7 @@ reasoning 字段与 logprob 解析的修复。Python 评分框架没有被改写
         { "provider": "deepseek", "model": "deepseek-chat", "numCandidates": 2 },
         { "provider": "local", "model": "Qwen/Qwen3.5-9B", "numCandidates": 1 }
       ],
+      "candidateScheduling": "sequential",
       "majorityVoting": true,
       "pivots": 2,
       "nVerifications": 1,
@@ -45,11 +46,13 @@ reasoning 字段与 logprob 解析的修复。Python 评分框架没有被改写
 ```
 
 将 `agent.models` 设为 `[]` 即恢复“跟随当前 session 模型”。`agent.context` 可启用独立的上下文精炼
-模型；`agent.verifierModel` 可单独覆盖评审模型。
+模型；`agent.verifierModel` 可单独覆盖评审模型。`agent.candidateScheduling` 支持 `parallel`（默认，
+同时发出）和 `sequential`（候选 1 完整结束后才发候选 2）。也可以直接在 DSH
+「设置 → Verifier」中切换调度模式和候选数量，下一次普通模型 step 即时生效。
 
 ### UI 实时控制台
 
-对话页的 `Verifier` 标签会通过 SSE 实时显示：上下文精炼状态、每个候选的 provider/model、生成状态、
+对话页的 `Verifier` 标签会通过 SSE 实时显示：上下文精炼状态、并行/串行调度方式、每个候选的 provider/model、生成状态、
 输出预览与 token 用量、精确多数票或 PPT 裁决方式、分数、胜者、比较次数、回退原因和异步 Progress
 结果。进程重启后仍可从 `~/.dsh/verifier/pipeline/` 的审计日志查看本会话历史。
 
@@ -151,7 +154,7 @@ API token。已覆盖：
 5. sidecar 与直接调用官方 `llm_verifier.select()` 的 index、scores、ranking 逐位一致；
 6. 离线 track、在线 tracker 均通过；
 7. Terminal-Bench 2.1 官方 loader 完整读到 89 个 task，零推理冒烟报告通过。
-8. session preset 隔离、异构候选路由、三候选并发、PPT 结果回放和多数投票短路均通过。
+8. session preset 隔离、异构候选路由、三候选并行/串行调度、PPT 结果回放和多数投票短路均通过。
 
 复跑命令：
 
