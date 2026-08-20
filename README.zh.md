@@ -47,6 +47,20 @@ reasoning 字段与 logprob 解析的修复。Python 评分框架没有被改写
 将 `agent.models` 设为 `[]` 即恢复“跟随当前 session 模型”。`agent.context` 可启用独立的上下文精炼
 模型；`agent.verifierModel` 可单独覆盖评审模型。
 
+### UI 实时控制台
+
+对话页的 `Verifier` 标签会通过 SSE 实时显示：上下文精炼状态、每个候选的 provider/model、生成状态、
+输出预览与 token 用量、精确多数票或 PPT 裁决方式、分数、胜者、比较次数、回退原因和异步 Progress
+结果。进程重启后仍可从 `~/.dsh/verifier/pipeline/` 的审计日志查看本会话历史。
+
+用户只需选择一次「Verifier 模式」并正常描述需求，不需要在提示词中要求 Agent 调用 verifier。准确边界是：
+
+- 只拦截该 preset 发起的普通 LLM step；上下文精炼等带内部 `purpose` 的辅助调用不会递归套娃；
+- `agent.enabled=false` 或候选总数小于等于 1 时按配置跳过；
+- 命中精确多数时会按 TurboAgent 设计短路，不再花费 PPT 评审调用；
+- PPT 不可用时会回退到第一个有效候选，并在 UI 中显式标黄，而不是假装验证成功；
+- 自动择优不等于形式化正确性保证；获胜候选执行工具时仍遵循 DSH 的访问模式和权限确认。
+
 ## 完整能力
 
 - A–T 20 个评分 token 的 logprob 期望，输出连续 `[0,1]` 奖励；

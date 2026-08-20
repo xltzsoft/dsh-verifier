@@ -1,5 +1,6 @@
 import assert from 'node:assert/strict'
 import {
+  agentPipelineSnapshot,
   candidateEntries,
   formatAction,
   formatHistory,
@@ -125,6 +126,14 @@ assert.equal(isVerifierAgent({
       saveLog: false,
     })) chunks.push(chunk)
   assert.equal(formatAction(chunks), 'same')
+  const snapshot = agentPipelineSnapshot()
+  const latest = snapshot.pipeline.activities[0]
+  assert.equal(latest.sessionId, 'session-1')
+  assert.equal(latest.status, 'complete')
+  assert.equal(latest.selection.method, 'majority')
+  assert.equal(latest.candidates.length, 3)
+  assert.equal(latest.candidates.filter(candidate => candidate.status === 'done').length, 3)
+  assert.equal(latest.bestIndex, 0)
 }
 
 console.log('agent pipeline tests passed')

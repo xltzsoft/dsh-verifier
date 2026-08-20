@@ -32,6 +32,26 @@ three times. `verifier_config.agent.models` may instead list heterogeneous DSH
 API keys are duplicated in this plugin's config. `agent.verifierModel` and the
 top-level verifier backend/model independently select the scoring model.
 
+### Live UI console
+
+The `Verifier` conversation tab streams the whole pipeline over SSE: context
+refinement, each candidate's route/status/action preview and token usage,
+majority or PPT selection, scores, winner, comparisons, fallback reason, and
+asynchronous Progress result. Session history survives process restarts through
+the audit logs in `~/.dsh/verifier/pipeline/`.
+
+After selecting `Verifier 模式`, users can state a task normally; no prompt-level
+guidance or explicit verifier tool call is required. The precise boundaries are:
+
+- only ordinary LLM steps initiated by this preset are intercepted; internal
+  purpose-tagged calls are not recursively wrapped;
+- `agent.enabled=false` or one total candidate disables the wrapper by config;
+- an exact majority intentionally short-circuits PPT;
+- an unavailable verifier falls back to the first valid candidate and is shown
+  as a warning in the UI;
+- best-of-N selection is not a formal correctness guarantee, and the winning
+  candidate's tools still obey normal DSH access and approval policies.
+
 ## Install
 
 ```bash

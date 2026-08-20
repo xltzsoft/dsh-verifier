@@ -1,7 +1,7 @@
 {
   "name": "@linxin666/dsh-verifier",
   "description": "DSH Verifier mode: a TurboAgent-equivalent automatic best-of-N agent pipeline plus the pinned, unmodified LLM-as-a-Verifier 0.2.0 framework. Supports custom DSH generation models, custom verifier backends/models, PPT selection, progress tracking, multimodal scoring, exact token/cache accounting, and official benchmarks.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "type": "module",
   "engines": {
     "node": "^22.19.0 || >=24.0.0"
@@ -9,6 +9,7 @@
   "main": "lib/index.js",
   "exports": {
     ".": "./lib/index.js",
+    "./client": "./lib/client.js",
     "./tools": "./lib/tools-entry.js",
     "./tools/package.json": "./package.json",
     "./package.json": "./package.json"
@@ -16,6 +17,13 @@
   "dsh": {
     "bundle": {
       "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [
+        "@deepseek-ai/dsh-client-runtime",
+        "@deepseek-ai/dsh-client-ui-conversation"
+      ],
+      "platform": "web"
     }
   },
   "files": [
