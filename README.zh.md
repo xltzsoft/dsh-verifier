@@ -1,5 +1,7 @@
 # Verifier 模式：DSH 的 LLM-as-a-Verifier preset
 
+[English](README.en.md) · 中文（默认）
+
 这是一个可直接选择的 DSH 会话模式：保留标准编码代理的全部能力，同时实现官方
 [TurboAgent](https://github.com/llm-as-a-verifier/TurboAgent) 的自动 best-of-N Agent 控制流，并接入
 [LLM-as-a-Verifier](https://github.com/llm-as-a-verifier/llm-as-a-verifier)。原来拼写错误的
