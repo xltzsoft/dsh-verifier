@@ -1,0 +1,47 @@
+{
+  "name": "@linxin666/dsh-verifier",
+  "description": "DSH Verifier mode: a TurboAgent-equivalent automatic best-of-N agent pipeline plus the pinned, unmodified LLM-as-a-Verifier 0.2.0 framework. Supports custom DSH generation models, custom verifier backends/models, PPT selection, progress tracking, multimodal scoring, exact token/cache accounting, and official benchmarks.",
+  "version": "0.4.0",
+  "type": "module",
+  "engines": {
+    "node": "^22.19.0 || >=24.0.0"
+  },
+  "main": "lib/index.js",
+  "exports": {
+    ".": "./lib/index.js",
+    "./tools": "./lib/tools-entry.js",
+    "./tools/package.json": "./package.json",
+    "./package.json": "./package.json"
+  },
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    }
+  },
+  "files": [
+    "lib/**/*.js",
+    "assets/**",
+    "presets/**",
+    "test/**",
+    "cordis.patch.yml",
+    "README.md",
+    "README.zh.md"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xltzsoft/dsh-verifier.git"
+  },
+  "bugs": {
+    "url": "https://github.com/xltzsoft/dsh-verifier/issues"
+  },
+  "homepage": "https://github.com/xltzsoft/dsh-verifier#readme",
+  "scripts": {
+    "check": "for f in lib/*.js test/*.mjs; do node --check \"$f\" || exit 1; done && PYTHONPYCACHEPREFIX=\"${TMPDIR:-/tmp}/dsh-verifier-pycache\" python3 -m py_compile assets/sidecar.py test/fake_openai.py test/integration.py && echo all source files OK",
+    "test:agent": "node test/agent-pipeline.mjs",
+    "test:integration": "python3 test/integration.py"
+  },
+  "dependencies": {
+    "schemastery": "^3.18.0"
+  }
+}

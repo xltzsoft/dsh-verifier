@@ -1,0 +1,11 @@
+# dsh-verifier bundle patch: inserts the dual-face plugin row into the web
+# profile roster. Applied as a profile bundle layer (the `dsh.bundle.patch`
+# manifest field) over dsh-base; activate with
+# `dsh plugin --profile web add file:/path/to/verifier`.
+#
+# The row is a bare plugin by package name: the node half (exports ".") runs
+# in the host process (sidecar manager and /api/verifier routes). The
+# model-facing `./tools` subpath is mounted only by the Verifier preset.
+- insert:
+    - id: verifier
+      name: '@linxin666/dsh-verifier'
